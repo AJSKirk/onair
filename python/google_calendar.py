@@ -6,9 +6,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from datetime import datetime
 import click
+import requests
+import json
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+API_URL = "https://www.googleapis.com/calendar/v3/freeBusy"
+SECRETS_FILE = "credentials.json"
+API_KEY = 'PLS_NO_STEAL'
 
 
 def get_creds():
@@ -26,7 +31,7 @@ def get_creds():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                SECRETS_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
@@ -37,13 +42,17 @@ def get_creds():
 def get_busies(creds, time_min: datetime, time_max: datetime, email: str, time_zone: str = "UTC"):
     service = build('calendar', 'v3', credentials=creds)
 
+    headers = {"Authorization": "Bearer {}".format(creds.token),
+              "Accept": "application/json",
+              "Content-Type": "application/json"}
+
     # I think ISOFormat works, else its YYYY-MM-DDTHH:MM:SS.ppZ
     body = {"timeMin": time_min.isoformat() + 'Z', "timeMax": time_max.isoformat() + 'Z', "timeZone": time_zone,
             "items": [{"id": email}]}
 
-    results = service.freebusy().query(body=body).execute()
-    busies = results['calendars'][email]['busy']
-    return busies
+    r = requests.post(API_URL, params={"key": API_KEY}, headers=headers, data=json.dumps(body))
+
+    return json.loads(r.text)['calendars'][email]['busy']
 
 
 @click.command()
