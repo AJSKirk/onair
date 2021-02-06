@@ -6,12 +6,20 @@
 const char* SSID_NAME = "PLS_NO_WARDRIVE";
 const char* SSID_PASSWD = "PLS_NO_WARDRIVE";
 
-const char* GCAL_URL = "LOVE";
-const char* GCAL_KEY = "EACH";
+const char* GCAL_URL = "https://www.googleapis.com/calendar/v3/freeBusy";
+const char* GCAL_KEY = "LOVE";
+const char* GCAL_FINGERPRINT = "EACH"; // SHA-1
+
 const char* EMAIL = "OTHER";
 
 int URL_BUFFER = 128;
-int BODY_BUFFER = 256;
+int BODY_BUFFER = 512;
+int MAX_GCAL_APPOINTMENTS = 24;
+
+struct gcal_time {
+  time_t start;
+  time_t end;
+};
 
 void setup() {
   // put your setup code here, to run once:
@@ -41,12 +49,12 @@ void setup() {
     Serial.print(".");
     delay(1000);
   }
-  Serial.println("Time received");
+  Serial.println(" Time received");
   
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
   
-  get_gcal("ITS_EXPIRED_ANYWAY");
+  get_gcal_times("ITS_EXPIRED_ANYWAY");
 }
 
 void loop() {
@@ -72,16 +80,20 @@ char *gcal_req_body(void) {
   return body;
 }
 
-String get_gcal(char *token) {
+struct gcal_time *get_gcal_times(char *token) {
   HTTPClient http;
   WiFiClientSecure client;
   
   char *url = (char *) malloc(URL_BUFFER * sizeof(char));
   char *bearer_header = (char *) malloc((strlen(token) + 8) * sizeof(char));
+  char *response = (char *) malloc(BODY_BUFFER * sizeof(char));
+  char *brkr, *brkt;  // strtok contextx
+  struct gcal_time *times = (struct gcal_time *) malloc(MAX_GCAL_APPOINTMENTS * sizeof(struct gcal_time));
+  char *next_time, *time_str;
   char *body = gcal_req_body();
-  int response_code;
+  struct tm *timestruct = (struct tm *) malloc(sizeof(struct tm));
+  int response_code, i;
 
-  Serial.println(body);
   sprintf(url, "%s?key=%s", GCAL_URL, GCAL_KEY);
   sprintf(bearer_header, "Bearer %s", token);
 
@@ -94,12 +106,32 @@ String get_gcal(char *token) {
   http.addHeader("Authorization", bearer_header);
 
   response_code = http.POST(body);
-  String response = http.getString();
-
-  Serial.println(response);
+  http.getString().toCharArray(response, BODY_BUFFER);
   http.end();
+
+  strtok_r(response, "[", &brkr);
+  while (next_time=strtok_r(NULL, "}]", &brkr)) {
+    strtok_r(next_time, ":", &brkt);
+    strtok_r(NULL, "\"", &brkt);
+    time_str = strtok_r(NULL, "\"", &brkt);
+    if (time_str == NULL)
+      break;
+      
+    strptime(time_str, "%Y-%m-%dT%TZ", timestruct);
+    times[i].start = mktime(timestruct);
+    
+    strtok_r(NULL, ":", &brkt);
+    strtok_r(NULL, "\"", &brkt);
+    time_str = strtok_r(NULL, "\"", &brkt);
+    strptime(time_str, "%Y-%m-%dT%TZ", timestruct);
+    times[i].end = mktime(timestruct);
+  
+    i++;
+  }
+  Serial.println("Y");
+  free(response);
   free(body);
   free(url);
   free(bearer_header);
-  return response;
+  return times;
 }
