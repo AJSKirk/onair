@@ -30,6 +30,7 @@ This is a pretty simple project, and a great one to replicate! Steps to do so ar
    - Go ahead and "publish" your app. Google will give some popup warnings to tell you that you'll need to go through a lengthy verification process, but ignore them. Once your app is published you can actually connect up to 100 users before Google makes you click the "verify" button.
 4. Modify the python script in this repository with your API keys and call with `python google_calendar.py <your_email@domain.com>` - This should open a webpage for you to sign in with Gmail and click through multiple "Warning: Unverified App" alerts, which will then save your personal OAuth token details to a token.pickle file.
 5. Take the `REFRESH_TOKEN` value from that pickle file and add it, alongside your Google Cloud Platform app creds and WiFi details, to the top of the `light_node_mcu.ino` file and upload it to your NodeMCU
+   - You *might* need to modify the timezone adjustment in the `configTime` call, the `gcal_req_body` function, or both. I think it's correct as it is, but one of the quirks of living in GMT is that it becomes impossible to test the difference between "correctly accounting for timezones" and "not at all accounting for timezones".
 6. On the NodeMCU, wire the following connections
    - Pin D0 (GPIO16) to RST - This sends the 'wake' signal for the NodeMCU to return from deep sleep
    - Pin D1 to the positive terminal of your light
