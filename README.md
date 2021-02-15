@@ -25,6 +25,7 @@ This is a pretty simple project, and a great one to replicate! Steps to do so ar
    - Python 3.x
    - A NodeMCU and UART driver, see [this post](https://cityos-air.readme.io/docs/1-mac-os-usb-drivers-for-nodemcu) for info
    - [NodeMCU PyFlasher](https://github.com/marcelstoer/nodemcu-pyflasher/releases)
+3. Flash the NodeMCU according to the instructions in the PyFlasher repo.
 3. Register a Google Cloud Platform app with the `calendar.readonly` sensitive scope. You'll need to set it up with an API Key as well as OAuth 2.0 Credentials
    - Go ahead and "publish" your app. Google will give some popup warnings to tell you that you'll need to go through a lengthy verification process, but ignore them. Once your app is published you can actually connect up to 100 users before Google makes you click the "verify" button.
 4. Modify the python script in this repository with your API keys and call with `python google_calendar.py <your_email@domain.com>` - This should open a webpage for you to sign in with Gmail and click through multiple "Warning: Unverified App" alerts, which will then save your personal OAuth token details to a token.pickle file.
