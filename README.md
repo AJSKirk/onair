@@ -18,7 +18,7 @@ This is a pretty simple project, and a great one to replicate! Steps to do so ar
      - The NodeMCU has a builtin LED if all you want to do is test the API interface, but it won't be a great signal
      - This README will assume you're using a low-power LED strip that can be powered by the 3.3V from the NodeMCU, but it isn't hard to extend it to switch a transistor/relay in order to control a higher power signal
    - A power source, either a regular USB output wall adapter or a 5-10V battery setup with connector
-   - A "good" micro USB cable. I don't know what "good" really covers here, but I had to go through about four until one was finally able to connect
+   - A micro USB cable that carries data, not just charge - these are rarer than you might think!
 2. Install (free) software. You'll need
    - Arduino IDE
      - And the ESP8266 Board Manager extension, which can be installed from within Arduino IDE
